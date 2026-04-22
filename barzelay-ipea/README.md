@@ -10,11 +10,21 @@ Briefing completo: [`../PROJETO_BARZELAY_IPEA.md`](../PROJETO_BARZELAY_IPEA.md).
 
 - **Fase 0 (Setup):** ✅ estrutura de pastas, dependências, config.
 - **Fase 1 (Scraping):** ✅ scraper paginado do DSpace + normalização +
-  persistência em Parquet + notebook de cobertura.
-- **Fase 2 (Extração):** pendente — download de PDFs + Docling.
-- **Fase 3 (Classificação):** pendente — prompts D1–D5 + LLM.
-- **Fase 4 (Validação humana):** pendente — Streamlit de anotação.
-- **Fase 5 (Análise):** pendente — calibração isotônica + longitudinal.
+  filtro por diretoria + amostra estratificada + notebooks de cobertura.
+- **Fase 2 (Extração):** ✅ download via `baixar_pdf` (cache SHA256) +
+  Docling (`do_ocr=True, do_table_structure=True`); CLI com flush
+  incremental e skip-existing.
+- **Fase 3 (Classificação):** ✅ prompts D1–D5 versionados + classificador
+  LLM Anthropic (LLMCaller injetável p/ testes), schema Pydantic, parser
+  tolerante a fenced JSON, append-only.
+- **Fase 4 (Validação humana):** ✅ Streamlit com anotação cega por padrão
+  + amostragem estratificada (década × tipo × oversample extremos).
+- **Fase 5 (Análise):** ✅ Cohen's kappa + Krippendorff's α + IsotonicRegression
+  por dimensão + médias por década/tipo + top palavras por polo.
+
+**93/93 testes passando.** Smoke real das Fases 2–4 (Docling pesado, custo
+LLM, anotação humana) fica para execução do usuário; Fase 5 já foi rodada
+end-to-end com dados sintéticos.
 
 ## Uso
 
@@ -36,6 +46,29 @@ uv run jupyter lab notebooks/01_cobertura.ipynb
 
 # 6. Notebook de cobertura do subset DIEST (grava metadados_diest.parquet)
 uv run jupyter lab notebooks/02_cobertura_diest.ipynb
+
+# 7. Amostra 10% estratificada por década (~1.758 docs)
+uv run jupyter lab notebooks/03_amostra_10pct.ipynb
+
+# 8. Fase 2 — download + Docling sobre a amostra (smoke 3 docs)
+uv run python -m src.extracao --input data/interim/metadados_amostra10.parquet --limit 3
+
+# 9. Fase 3 — classificação LLM (precisa ANTHROPIC_API_KEY)
+export ANTHROPIC_API_KEY=...
+uv run python -m src.classificacao --input data/interim/textos.parquet --limit 3
+
+# 10. Fase 4 — Streamlit de validação humana
+uv run streamlit run src/validacao/app.py -- \
+    --classificacoes data/processed/classificacoes.parquet \
+    --textos data/interim/textos.parquet \
+    --metadados data/interim/metadados.parquet \
+    --amostra data/processed/amostra_validacao.parquet
+
+# 11. Fase 5 — análise consolidada
+uv run python -m src.analise \
+    --classificacoes data/processed/classificacoes.parquet \
+    --metadados data/interim/metadados.parquet \
+    --validacoes data/processed/validacoes_humanas.parquet
 ```
 
 Saídas:
