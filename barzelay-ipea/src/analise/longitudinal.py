@@ -85,10 +85,13 @@ def _join_anos(
     *,
     score_col: str,
     with_tipo: bool = False,
+    ano_min: int = 1950,
+    ano_max: int = 2030,
 ) -> pd.DataFrame:
     cols = ["id", "ano"] + (["tipo"] if with_tipo else [])
     meta = metadados[cols].dropna(subset=["ano"]).copy()
     meta["ano"] = meta["ano"].astype(int)
+    meta = meta[(meta["ano"] >= ano_min) & (meta["ano"] <= ano_max)]
     meta["decada"] = (meta["ano"] // 10) * 10
 
     cls = classificacoes.dropna(subset=[score_col]).copy()

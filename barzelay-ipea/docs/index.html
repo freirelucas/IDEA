@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Barzelay-IPEA — Classificação de marcadores de idealização</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>Barzelay-IPEA</h1>
+  <p class="subtitle">Classificação sistemática do repositório do IPEA quanto a marcadores de <em>idealização</em> (Barzelay 2019) — via LLM com validação humana.</p>
+  <p class="meta">Autor: Lucas Freire Silva (DIEST/COGIT/IPEA). Gerado em 2026-04-22 18:17 UTC.</p>
+</header>
+
+<section id="sobre">
+  <h2>O projeto</h2>
+  <p>O conhecimento produzido historicamente pelo IPEA exibe <strong>orientação para design</strong> (idealização forte) ou predominantemente marcadores descritivos (idealização fraca)? O corpus do repositório institucional é classificado em cinco dimensões operacionais derivadas de Michael Barzelay, escala Likert 1–5, via LLM com validação humana e calibração isotônica.</p>
+  
+    <table class="dims">
+      <thead><tr><th>Dim</th><th>Polo 1–2 (descritivo)</th><th>Polo 4–5 (design)</th></tr></thead>
+      <tbody>
+        <tr><td>D1 Temporal</td><td>Backward-looking ("foi observado")</td><td>Forward-looking ("deveria")</td></tr>
+        <tr><td>D2 Epistemológica</td><td>Descritiva ("os dados mostram")</td><td>Normativa ("recomenda-se")</td></tr>
+        <tr><td>D3 Teoria-prática</td><td>Segregada (revisão isolada)</td><td>Integrada (teoria → desenho)</td></tr>
+        <tr><td>D4 Agência</td><td>Passiva/estrutural</td><td>Atores institucionais nomeados</td></tr>
+        <tr><td>D5 Foco analítico</td><td>Fragmentado (variável a variável)</td><td>Sintético (design coerente)</td></tr>
+      </tbody>
+    </table>
+    
+</section>
+
+<section id="pipeline">
+  <h2>Pipeline</h2>
+  
+    <ul class="pipeline">
+      <li><span class="tag ok">Fase 1 ✓</span> Scraping paginado do DSpace IPEA — 17.943 docs.</li>
+      <li><span class="tag ok">Fase 2 ✓</span>
+        Download + extração PyMuPDF — 163/176 docs (textos.parquet).</li>
+      <li><span class="tag todo">Fase 3 sintético</span>
+        Classificação D1–D5 via LLM — precisa <code>ANTHROPIC_API_KEY</code>.</li>
+      <li><span class="tag todo">Fase 4 …</span> Validação humana via Streamlit — pesquisadores anotam ~300 docs.</li>
+      <li><span class="tag todo">Fase 5 …</span> Calibração isotônica + Cohen's κ + análise longitudinal — roda quando Fase 4 existir.</li>
+    </ul>
+    
+</section>
+
+<section id="kpis">
+  <h2>Estatísticas</h2>
+  <div class="kpi-grid"><div class="kpi"><div class="label">Documentos</div><div class="value">17.943</div></div><div class="kpi"><div class="label">Anos (min–max)</div><div class="value">88–2026</div></div><div class="kpi"><div class="label">Com handle</div><div class="value">99.9%</div></div><div class="kpi"><div class="label">Textos extraídos</div><div class="value">163 / 176</div></div><div class="kpi"><div class="label">Chars extraídos</div><div class="value">20.263.949</div></div><div class="kpi"><div class="label">Classificações</div><div class="value">89.715 (≈ 17.943 docs × 5 dim)</div></div></div>
+</section>
+
+<section id="classificacoes">
+  <h2>Resultados das classificações</h2>
+  <div class="banner">⚠ <strong>Classificações sintéticas.</strong> Dados gerados por <code>src.classificacao.synth</code> como placeholder — substitua rodando <code>src.classificacao</code> com <code>ANTHROPIC_API_KEY</code>. O site re-renderiza automaticamente ao detectar o parquet real.</div>
+  <figure>
+    <img src="figures/01_media_por_decada.png" alt="Média por década × dimensão">
+    <figcaption>Score médio por década × dimensão (1=descritivo, 5=design).</figcaption>
+  </figure>
+  <figure>
+    <img src="figures/02_heatmap_decada_dim.png" alt="Heatmap década × dimensão">
+    <figcaption>Heatmap dos mesmos dados. Cores vermelhas tendem ao polo descritivo, azuis ao design.</figcaption>
+  </figure>
+  <figure>
+    <img src="figures/03_distribuicao_scores.png" alt="Distribuição de scores">
+    <figcaption>Distribuição de cada nota (1–5) por dimensão no corpus todo.</figcaption>
+  </figure>
+  <h3>Evolução por tipo documental</h3>
+  <figure><img src="figures/04_tipo_D1.png" alt="D1 por tipo"><figcaption>D1 Temporal.</figcaption></figure>
+  <figure><img src="figures/04_tipo_D2.png" alt="D2 por tipo"><figcaption>D2 Epistemológica.</figcaption></figure>
+  <figure><img src="figures/04_tipo_D3.png" alt="D3 por tipo"><figcaption>D3 Teoria-prática.</figcaption></figure>
+  <figure><img src="figures/04_tipo_D4.png" alt="D4 por tipo"><figcaption>D4 Agência.</figcaption></figure>
+  <figure><img src="figures/04_tipo_D5.png" alt="D5 por tipo"><figcaption>D5 Foco analítico.</figcaption></figure>
+  <h3>Top palavras-chave por polo</h3>
+  <figure>
+    <img src="figures/05_palavras_polo.png" alt="Palavras-chave por polo">
+    <figcaption>Palavras-chave mais frequentes nos documentos de score ≥4 (design) vs ≤2 (descritivo).</figcaption>
+  </figure>
+</section>
+
+<section id="medias">
+  <h2>Médias por década</h2>
+  <table>
+    <thead><tr><th>Década</th><th>D1</th><th>D2</th><th>D3</th><th>D4</th><th>D5</th></tr></thead>
+    <tbody>
+    <tr><td>1960</td><td class='num'>2.41</td><td class='num'>2.47</td><td class='num'>2.61</td><td class='num'>2.46</td><td class='num'>3.16</td></tr>
+<tr><td>1970</td><td class='num'>2.42</td><td class='num'>2.56</td><td class='num'>2.45</td><td class='num'>2.47</td><td class='num'>3.05</td></tr>
+<tr><td>1980</td><td class='num'>2.47</td><td class='num'>2.60</td><td class='num'>2.44</td><td class='num'>2.44</td><td class='num'>3.03</td></tr>
+<tr><td>1990</td><td class='num'>2.54</td><td class='num'>2.65</td><td class='num'>2.49</td><td class='num'>2.52</td><td class='num'>3.08</td></tr>
+<tr><td>2000</td><td class='num'>2.62</td><td class='num'>2.69</td><td class='num'>2.41</td><td class='num'>2.51</td><td class='num'>2.98</td></tr>
+<tr><td>2010</td><td class='num'>2.68</td><td class='num'>2.74</td><td class='num'>2.43</td><td class='num'>2.54</td><td class='num'>3.02</td></tr>
+<tr><td>2020</td><td class='num'>2.71</td><td class='num'>2.74</td><td class='num'>2.40</td><td class='num'>2.55</td><td class='num'>3.03</td></tr>
+
+    </tbody>
+  </table>
+</section>
+
+<section id="corpus">
+  <h2>Corpus (Fase 1)</h2>
+  <div class="kpi-grid">
+    <div class="kpi"><div class="label">Décadas cobertas</div>
+      <table><thead><tr><th>Década</th><th>N</th></tr></thead><tbody><tr><td>80</td><td class='num'>1</td></tr>
+<tr><td>1960</td><td class='num'>250</td></tr>
+<tr><td>1970</td><td class='num'>836</td></tr>
+<tr><td>1980</td><td class='num'>1.268</td></tr>
+<tr><td>1990</td><td class='num'>1.855</td></tr>
+<tr><td>2000</td><td class='num'>2.771</td></tr>
+<tr><td>2010</td><td class='num'>6.086</td></tr>
+<tr><td>2020</td><td class='num'>4.500</td></tr></tbody></table>
+    </div>
+    <div class="kpi"><div class="label">Top tipos documentais</div>
+      <table><thead><tr><th>Tipo</th><th>N</th></tr></thead><tbody><tr><td>Working paper</td><td class='num'>5.015</td></tr>
+<tr><td>Journal article</td><td class='num'>5.003</td></tr>
+<tr><td>Book</td><td class='num'>2.617</td></tr>
+<tr><td>Book part</td><td class='num'>2.093</td></tr>
+<tr><td>Journal</td><td class='num'>1.038</td></tr>
+<tr><td>Report</td><td class='num'>823</td></tr>
+<tr><td>Journal Article</td><td class='num'>608</td></tr>
+<tr><td></td><td class='num'>382</td></tr>
+<tr><td>Researchers</td><td class='num'>175</td></tr>
+<tr><td>Eventos</td><td class='num'>74</td></tr></tbody></table>
+    </div>
+  </div>
+</section>
+
+<section id="como-rodar">
+  <h2>Como regerar com dados reais</h2>
+  <pre><code># 1. Rodar Fase 2 completa (apenas a amostra 10% leva ~3h; todo corpus ~30h)
+uv run python -m src.extracao --input data/interim/metadados_amostra10.parquet --engine pymupdf
+
+# 2. Rodar Fase 3 real (precisa chave API — custo ~$30-80 no 10%)
+export ANTHROPIC_API_KEY=sk-ant-...
+uv run python -m src.classificacao --input data/interim/textos_amostra10.parquet
+
+# 3. Regenerar o site
+uv run python -m src.analise.build_site</code></pre>
+  <p>GitHub Pages: em <em>Settings → Pages</em>, escolha <code>Deploy from a branch</code>, <code>main</code> / <code>/docs</code>.</p>
+</section>
+
+<footer>
+  <p>Código: <a href="https://github.com/freirelucas/IDEA">github.com/freirelucas/IDEA</a> — branch <code>claude/analyze-codebase-CEDYD</code>.</p>
+  <p>Briefing completo do projeto: <code>PROJETO_BARZELAY_IPEA.md</code>.</p>
+</footer>
+
+</div>
+</body>
+</html>

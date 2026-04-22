@@ -69,7 +69,23 @@ uv run python -m src.analise \
     --classificacoes data/processed/classificacoes.parquet \
     --metadados data/interim/metadados.parquet \
     --validacoes data/processed/validacoes_humanas.parquet
+
+# 12. Gerar site estático em docs/ para GitHub Pages
+uv run python -m src.analise.build_site
 ```
+
+## GitHub Pages
+
+A pasta `docs/` contém o site estático (HTML + PNGs). Para publicar:
+
+1. **Settings → Pages** no repositório GitHub.
+2. **Source:** `Deploy from a branch`.
+3. **Branch:** `main` · **Folder:** `/docs`.
+4. Commit em `main` da pasta `docs/` publica automaticamente.
+
+O site exibe KPIs do corpus, cobertura da extração, gráficos de classificação
+(reais ou sintéticos), médias por década e instruções para regerar com
+dados reais. Regenerar: `uv run python -m src.analise.build_site`.
 
 Saídas:
 - `data/raw/metadados_raw_{timestamp}.parquet` — campos brutos da API DSpace.

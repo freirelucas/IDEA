@@ -1,0 +1,50 @@
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 16px;
+  line-height: 1.55;
+  color: #1a1a1a;
+  background: #fafafa;
+}
+.wrap { max-width: 1040px; margin: 0 auto; padding: 24px; }
+header { border-bottom: 1px solid #ddd; padding-bottom: 16px; margin-bottom: 24px; }
+h1 { font-size: 28px; margin: 0 0 6px; letter-spacing: -0.02em; }
+h2 { font-size: 22px; margin-top: 36px; border-bottom: 1px solid #eee; padding-bottom: 6px; }
+h3 { font-size: 17px; margin-top: 22px; }
+.subtitle { color: #666; margin: 0; }
+.meta { color: #888; font-size: 13px; margin-top: 8px; }
+.banner {
+  background: #fff5d7; border-left: 4px solid #e6a700;
+  padding: 12px 16px; margin: 20px 0;
+  font-size: 14px; border-radius: 4px;
+}
+.banner.ok { background: #e7f4e4; border-left-color: #38a169; }
+.banner.err { background: #fde5e5; border-left-color: #c53030; }
+code { background: #f1f1f1; padding: 2px 5px; border-radius: 3px; font-size: 0.9em; }
+pre {
+  background: #f6f8fa; padding: 12px 16px;
+  overflow-x: auto; font-size: 13px; border-radius: 4px;
+}
+table { border-collapse: collapse; margin: 16px 0; width: 100%; font-size: 14px; }
+th, td { border: 1px solid #ddd; padding: 6px 10px; text-align: left; }
+th { background: #f0f0f0; }
+td.num { text-align: right; font-variant-numeric: tabular-nums; }
+.kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin: 20px 0; }
+.kpi {
+  background: white; border: 1px solid #e5e5e5; border-radius: 6px;
+  padding: 14px 16px;
+}
+.kpi .label { color: #666; font-size: 13px; }
+.kpi .value { font-size: 22px; font-weight: 600; margin-top: 4px; font-variant-numeric: tabular-nums; }
+figure { margin: 20px 0; }
+figure img { max-width: 100%; height: auto; border: 1px solid #eee; border-radius: 4px; }
+figcaption { color: #666; font-size: 13px; margin-top: 6px; }
+.pipeline { list-style: none; padding: 0; }
+.pipeline li { padding: 8px 0; border-bottom: 1px dashed #e5e5e5; }
+.pipeline .tag { display: inline-block; min-width: 72px; font-weight: 600; }
+.pipeline .ok { color: #38a169; }
+.pipeline .todo { color: #b58500; }
+.dims td:first-child { font-weight: 600; white-space: nowrap; }
+footer { color: #666; font-size: 13px; margin-top: 48px; padding-top: 16px; border-top: 1px solid #eee; }
+a { color: #0366d6; }
