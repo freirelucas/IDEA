@@ -121,8 +121,8 @@ def _kpi(label: str, value: str) -> str:
 def build_site(
     meta_path: Path = ROOT / "data/interim/metadados.parquet",
     textos_paths: tuple[Path, ...] = (
-        ROOT / "data/interim/textos.parquet",
         ROOT / "data/interim/textos_amostra10.parquet",
+        ROOT / "data/interim/textos.parquet",
     ),
     cls_real: Path = ROOT / "data/processed/classificacoes.parquet",
     cls_synth: Path = ROOT / "data/processed/classificacoes_synth.parquet",
