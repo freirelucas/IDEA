@@ -44,8 +44,11 @@ from src.analise.viz import (
 
 log = logging.getLogger(__name__)
 
+# `ROOT` aponta para a raiz do projeto (barzelay-ipea/); `REPO_ROOT` para a
+# raiz do repositório git (um nível acima), onde o GitHub Pages procura /docs.
 ROOT = Path(__file__).resolve().parent.parent.parent
-DOCS = ROOT / "docs"
+REPO_ROOT = ROOT.parent
+DOCS = REPO_ROOT / "docs"
 FIG_DIR = DOCS / "figures"
 
 
