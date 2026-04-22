@@ -11,7 +11,7 @@
 <header>
   <h1>Barzelay-IPEA</h1>
   <p class="subtitle">Classificação sistemática do repositório do IPEA quanto a marcadores de <em>idealização</em> (Barzelay 2019) — via LLM com validação humana.</p>
-  <p class="meta">Autor: Lucas Freire Silva (DIEST/COGIT/IPEA). Gerado em 2026-04-22 21:45 UTC.</p>
+  <p class="meta">Autor: Lucas Freire Silva (DIEST/COGIT/IPEA). Gerado em 2026-04-22 21:53 UTC.</p>
 </header>
 
 <section id="sobre">
@@ -38,8 +38,8 @@
       <li><span class="tag ok">Fase 1 ✓</span> Scraping paginado do DSpace IPEA — 17.943 docs.</li>
       <li><span class="tag ok">Fase 2 ✓</span>
         Download + extração PyMuPDF — 1.558/1.758 docs (textos_amostra10.parquet).</li>
-      <li><span class="tag todo">Fase 3 sintético</span>
-        Classificação D1–D5 via LLM — precisa <code>ANTHROPIC_API_KEY</code>.</li>
+      <li><span class="tag todo">Fase 3 🧪 demo (mock)</span>
+        Classificação D1–D5 via LLM — precisa <code>ANTHROPIC_API_KEY</code>. Demo via <code>--mock</code> usa features textuais (custo zero).</li>
       <li><span class="tag todo">Fase 4 …</span> Validação humana via Streamlit — pesquisadores anotam ~300 docs.</li>
       <li><span class="tag todo">Fase 5 …</span> Calibração isotônica + Cohen's κ + análise longitudinal — roda quando Fase 4 existir.</li>
     </ul>
@@ -48,12 +48,12 @@
 
 <section id="kpis">
   <h2>Estatísticas</h2>
-  <div class="kpi-grid"><div class="kpi"><div class="label">Documentos</div><div class="value">17.943</div></div><div class="kpi"><div class="label">Anos (min–max)</div><div class="value">88–2026</div></div><div class="kpi"><div class="label">Com handle</div><div class="value">99.9%</div></div><div class="kpi"><div class="label">Textos extraídos</div><div class="value">1.558 / 1.758</div></div><div class="kpi"><div class="label">Chars extraídos</div><div class="value">182.215.484</div></div><div class="kpi"><div class="label">Classificações</div><div class="value">89.715 (≈ 17.943 docs × 5 dim)</div></div></div>
+  <div class="kpi-grid"><div class="kpi"><div class="label">Documentos</div><div class="value">17.943</div></div><div class="kpi"><div class="label">Anos (min–max)</div><div class="value">88–2026</div></div><div class="kpi"><div class="label">Com handle</div><div class="value">99.9%</div></div><div class="kpi"><div class="label">Textos extraídos</div><div class="value">1.558 / 1.758</div></div><div class="kpi"><div class="label">Chars extraídos</div><div class="value">182.215.484</div></div><div class="kpi"><div class="label">Classificações</div><div class="value">755 (≈ 151 docs × 5 dim)</div></div></div>
 </section>
 
 <section id="classificacoes">
   <h2>Resultados das classificações</h2>
-  <div class="banner">⚠ <strong>Classificações sintéticas.</strong> Dados gerados por <code>src.classificacao.synth</code> como placeholder — substitua rodando <code>src.classificacao</code> com <code>ANTHROPIC_API_KEY</code>. O site re-renderiza automaticamente ao detectar o parquet real.</div>
+  <div class="banner">🧪 <strong>Demo via mock_caller (features textuais).</strong> Scores derivados de contagem de marcadores linguísticos no texto (modais deônticos, atores institucionais, etc), <em>não</em> de LLM. Substitua por Fase 3 real rodando <code>python -m src.classificacao</code> com <code>ANTHROPIC_API_KEY</code> — o site re-renderiza automaticamente.</div>
   <figure>
     <img src="figures/01_media_por_decada.png" alt="Média por década × dimensão">
     <figcaption>Score médio por década × dimensão (1=descritivo, 5=design).</figcaption>
@@ -84,13 +84,13 @@
   <table>
     <thead><tr><th>Década</th><th>D1</th><th>D2</th><th>D3</th><th>D4</th><th>D5</th></tr></thead>
     <tbody>
-    <tr><td>1960</td><td class='num'>2.41</td><td class='num'>2.47</td><td class='num'>2.61</td><td class='num'>2.46</td><td class='num'>3.16</td></tr>
-<tr><td>1970</td><td class='num'>2.42</td><td class='num'>2.56</td><td class='num'>2.45</td><td class='num'>2.47</td><td class='num'>3.05</td></tr>
-<tr><td>1980</td><td class='num'>2.47</td><td class='num'>2.60</td><td class='num'>2.44</td><td class='num'>2.44</td><td class='num'>3.03</td></tr>
-<tr><td>1990</td><td class='num'>2.54</td><td class='num'>2.65</td><td class='num'>2.49</td><td class='num'>2.52</td><td class='num'>3.08</td></tr>
-<tr><td>2000</td><td class='num'>2.62</td><td class='num'>2.69</td><td class='num'>2.41</td><td class='num'>2.51</td><td class='num'>2.98</td></tr>
-<tr><td>2010</td><td class='num'>2.68</td><td class='num'>2.74</td><td class='num'>2.43</td><td class='num'>2.54</td><td class='num'>3.02</td></tr>
-<tr><td>2020</td><td class='num'>2.71</td><td class='num'>2.74</td><td class='num'>2.40</td><td class='num'>2.55</td><td class='num'>3.03</td></tr>
+    <tr><td>1960</td><td class='num'>4.00</td><td class='num'>1.50</td><td class='num'>3.00</td><td class='num'>3.50</td><td class='num'>2.00</td></tr>
+<tr><td>1970</td><td class='num'>3.40</td><td class='num'>1.80</td><td class='num'>2.40</td><td class='num'>4.00</td><td class='num'>3.00</td></tr>
+<tr><td>1980</td><td class='num'>3.00</td><td class='num'>2.29</td><td class='num'>2.43</td><td class='num'>3.71</td><td class='num'>3.14</td></tr>
+<tr><td>1990</td><td class='num'>2.57</td><td class='num'>2.07</td><td class='num'>2.57</td><td class='num'>3.93</td><td class='num'>2.71</td></tr>
+<tr><td>2000</td><td class='num'>2.76</td><td class='num'>2.00</td><td class='num'>2.44</td><td class='num'>3.84</td><td class='num'>2.76</td></tr>
+<tr><td>2010</td><td class='num'>2.59</td><td class='num'>2.23</td><td class='num'>2.62</td><td class='num'>4.04</td><td class='num'>3.05</td></tr>
+<tr><td>2020</td><td class='num'>2.33</td><td class='num'>1.79</td><td class='num'>2.52</td><td class='num'>4.12</td><td class='num'>2.90</td></tr>
 
     </tbody>
   </table>

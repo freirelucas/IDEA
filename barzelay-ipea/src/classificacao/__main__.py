@@ -24,6 +24,7 @@ import pandas as pd
 from tqdm import tqdm
 
 from src.classificacao.classifier import classificar, make_anthropic_caller
+from src.classificacao.mock_caller import make_mock_caller
 from src.classificacao.prompts import DIMENSOES, load_prompt
 
 
@@ -60,6 +61,12 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Pula (doc, dimensão, prompt_version) já presentes no output.",
     )
+    p.add_argument(
+        "--mock",
+        action="store_true",
+        help="Usa mock_caller (features textuais, custo zero) em vez de chamar a API. "
+             "Rotula o parquet com modelo='mock-text-features-1.0'.",
+    )
     p.add_argument("--sleep", type=float, default=0.5, help="Sleep entre chamadas LLM.")
     p.add_argument("--log-level", default="INFO")
     return p.parse_args()
@@ -74,8 +81,8 @@ def main() -> int:
     )
     log = logging.getLogger("barzelay.classificacao")
 
-    if not os.getenv("ANTHROPIC_API_KEY"):
-        log.error("ANTHROPIC_API_KEY ausente. Defina antes de rodar.")
+    if not args.mock and not os.getenv("ANTHROPIC_API_KEY"):
+        log.error("ANTHROPIC_API_KEY ausente. Use --mock para rodar sem API.")
         return 2
 
     textos = pd.read_parquet(args.input)
@@ -90,7 +97,13 @@ def main() -> int:
     args.output.parent.mkdir(parents=True, exist_ok=True)
     existing = _load_existing(args.output)
     templates = {d: load_prompt(d) for d in args.dimensoes}
-    caller = make_anthropic_caller(args.model)
+    if args.mock:
+        caller = make_mock_caller()
+        modelo_nome = "mock-text-features-1.0"
+        log.warning("MOCK: usando features textuais, não LLM real.")
+    else:
+        caller = make_anthropic_caller(args.model)
+        modelo_nome = args.model
 
     rows: list[dict] = []
     pbar = tqdm(total=len(df) * len(args.dimensoes), desc="classificando")
@@ -120,7 +133,7 @@ def main() -> int:
                     "score": res.classificacao.score,
                     "trechos_evidencia": res.classificacao.trechos_evidencia,
                     "justificativa": res.classificacao.justificativa,
-                    "modelo": args.model,
+                    "modelo": modelo_nome,
                     "prompt_version": tpl.versao,
                     "tokens_input": res.stats.tokens_input,
                     "tokens_output": res.stats.tokens_output,
@@ -134,20 +147,23 @@ def main() -> int:
                     "score": None,
                     "trechos_evidencia": [],
                     "justificativa": f"ERRO: {e}",
-                    "modelo": args.model,
+                    "modelo": modelo_nome,
                     "prompt_version": tpl.versao,
                     "tokens_input": 0,
                     "tokens_output": 0,
                     "timestamp": datetime.now(timezone.utc).isoformat(),
                 })
             pbar.update(1)
-            time.sleep(args.sleep)
+            if not args.mock:
+                time.sleep(args.sleep)
 
-            # flush a cada 50 linhas (~10 docs)
-            if len(rows) % 50 == 0:
+            # flush a cada 50 linhas (~10 docs), esvaziando o buffer
+            if len(rows) >= 50:
                 _flush(rows, args.output)
+                rows.clear()
     pbar.close()
     _flush(rows, args.output)
+    rows.clear()
     log.info("Concluído: %d classificações em %s", len(rows), args.output)
     return 0
 
@@ -165,6 +181,10 @@ def _flush(rows: list[dict], path: Path) -> None:
     df = pd.DataFrame(rows)
     if path.exists():
         df = pd.concat([pd.read_parquet(path), df], ignore_index=True)
+    # dedupe caso de retry de uma mesma (doc, dim, prompt_version)
+    df = df.drop_duplicates(
+        subset=["document_id", "dimensao", "prompt_version"], keep="last"
+    )
     df.to_parquet(path, index=False)
 
 

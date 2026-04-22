@@ -125,6 +125,7 @@ def build_site(
         ROOT / "data/interim/textos.parquet",
     ),
     cls_real: Path = ROOT / "data/processed/classificacoes.parquet",
+    cls_demo: Path = ROOT / "data/processed/classificacoes_demo.parquet",
     cls_synth: Path = ROOT / "data/processed/classificacoes_synth.parquet",
     val_path: Path = ROOT / "data/processed/validacoes_humanas.parquet",
 ) -> None:
@@ -142,17 +143,21 @@ def build_site(
             textos_source = p.name
             break
 
-    # classificações: real > synth
+    # classificações: real > demo (mock features) > synth (só metadados)
     if cls_real.exists():
         cls = pd.read_parquet(cls_real)
-        cls_is_synth = False
+        cls_source = "real"
+    elif cls_demo.exists():
+        cls = pd.read_parquet(cls_demo)
+        cls_source = "demo"
     elif cls_synth.exists():
         cls = pd.read_parquet(cls_synth)
-        cls_is_synth = True
+        cls_source = "synth"
     else:
         raise FileNotFoundError(
             "Sem parquet de classificações. Rode Fase 3 ou gere sintético."
         )
+    cls_is_synth = cls_source == "synth"
 
     # gerar figuras
     log.info("Renderizando figuras para %s", FIG_DIR)
@@ -172,12 +177,14 @@ def build_site(
 
     # HTML
     html_text = _render_html(meta=meta, textos=textos, textos_source=textos_source,
-                             cls=cls, cls_is_synth=cls_is_synth, medias=medias)
+                             cls=cls, cls_source=cls_source, medias=medias)
     (DOCS / "index.html").write_text(html_text, encoding="utf-8")
     log.info("Site gerado: %s", DOCS / "index.html")
 
 
-def _render_html(*, meta, textos, textos_source, cls, cls_is_synth, medias) -> str:
+def _render_html(*, meta, textos, textos_source, cls, cls_source, medias) -> str:
+    cls_is_synth = cls_source == "synth"
+    cls_is_demo = cls_source == "demo"
     n_docs = len(meta)
     anos = meta["ano"].dropna().astype(int)
     ano_min, ano_max = int(anos.min()), int(anos.max())
@@ -193,14 +200,24 @@ def _render_html(*, meta, textos, textos_source, cls, cls_is_synth, medias) -> s
     n_cls = len(cls)
     n_cls_docs = cls["document_id"].nunique()
 
-    banner_cls = (
-        '<div class="banner">⚠ <strong>Classificações sintéticas.</strong> '
-        'Dados gerados por <code>src.classificacao.synth</code> como placeholder — '
-        'substitua rodando <code>src.classificacao</code> com <code>ANTHROPIC_API_KEY</code>. '
-        'O site re-renderiza automaticamente ao detectar o parquet real.</div>'
-        if cls_is_synth else
-        '<div class="banner ok">✓ Classificações reais de LLM.</div>'
-    )
+    if cls_is_synth:
+        banner_cls = (
+            '<div class="banner">⚠ <strong>Classificações sintéticas (placeholder).</strong> '
+            'Geradas por <code>src.classificacao.synth</code> apenas a partir de metadados '
+            '(ano, tipo) — não leem o texto. Rode '
+            '<code>python -m src.classificacao --mock</code> para ver o demo que usa '
+            'features textuais, ou configure <code>ANTHROPIC_API_KEY</code> para Fase 3 real.</div>'
+        )
+    elif cls_is_demo:
+        banner_cls = (
+            '<div class="banner">🧪 <strong>Demo via mock_caller (features textuais).</strong> '
+            'Scores derivados de contagem de marcadores linguísticos no texto '
+            '(modais deônticos, atores institucionais, etc), <em>não</em> de LLM. '
+            'Substitua por Fase 3 real rodando <code>python -m src.classificacao</code> '
+            'com <code>ANTHROPIC_API_KEY</code> — o site re-renderiza automaticamente.</div>'
+        )
+    else:
+        banner_cls = '<div class="banner ok">✓ Classificações reais de LLM.</div>'
 
     tipo_counts = meta["tipo"].fillna("(sem tipo)").value_counts().head(10)
     tipo_rows = "\n".join(
@@ -250,8 +267,8 @@ def _render_html(*, meta, textos, textos_source, cls, cls_is_synth, medias) -> s
       <li><span class="tag ok">Fase 1 ✓</span> Scraping paginado do DSpace IPEA — {_fmt_int(n_docs)} docs.</li>
       <li><span class="tag {'ok' if textos_total else 'todo'}">Fase 2 {'✓' if textos_total else '…'}</span>
         Download + extração PyMuPDF — {_fmt_int(textos_ok)}/{_fmt_int(textos_total)} docs {('(' + textos_source + ')') if textos_source else 'pendente'}.</li>
-      <li><span class="tag {'todo' if cls_is_synth else 'ok'}">Fase 3 {'sintético' if cls_is_synth else '✓'}</span>
-        Classificação D1–D5 via LLM — precisa <code>ANTHROPIC_API_KEY</code>.</li>
+      <li><span class="tag {'ok' if cls_source == 'real' else 'todo'}">Fase 3 {'✓ real' if cls_source == 'real' else ('🧪 demo (mock)' if cls_is_demo else 'sintético')}</span>
+        Classificação D1–D5 via LLM — precisa <code>ANTHROPIC_API_KEY</code>. Demo via <code>--mock</code> usa features textuais (custo zero).</li>
       <li><span class="tag todo">Fase 4 …</span> Validação humana via Streamlit — pesquisadores anotam ~300 docs.</li>
       <li><span class="tag todo">Fase 5 …</span> Calibração isotônica + Cohen's κ + análise longitudinal — roda quando Fase 4 existir.</li>
     </ul>
