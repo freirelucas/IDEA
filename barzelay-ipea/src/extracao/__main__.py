@@ -21,7 +21,7 @@ import pandas as pd
 from tqdm import tqdm
 
 from src.extracao.download import baixar_pdf
-from src.extracao.pdf import ler_pdf_com_docling
+from src.extracao.pdf import extrair_com_pymupdf, ler_pdf_com_docling
 
 
 def parse_args() -> argparse.Namespace:
@@ -38,6 +38,13 @@ def parse_args() -> argparse.Namespace:
         type=Path,
         default=Path("cache/pdfs"),
         help="Diretório de cache de PDFs (sha256.pdf).",
+    )
+    p.add_argument(
+        "--engine",
+        choices=["pymupdf", "docling"],
+        default="pymupdf",
+        help="Engine de extração. pymupdf é rápida (~1s/PDF), usa texto nativo; "
+             "docling é pesada mas faz OCR novo com EasyOCR (precisa `pip install easyocr`).",
     )
     p.add_argument("--limit", type=int, default=None, help="Limita N documentos (smoke).")
     p.add_argument(
@@ -91,10 +98,13 @@ def main() -> int:
             continue
 
         try:
-            extract = ler_pdf_com_docling(dl.pdf_path)
+            if args.engine == "pymupdf":
+                extract = extrair_com_pymupdf(dl.pdf_path)
+            else:
+                extract = ler_pdf_com_docling(dl.pdf_path)
         except Exception as e:
-            log.exception("Erro Docling %s", doc_id)
-            rows.append(_row_error(doc_id, handle, f"docling_err:{e}", sha256=dl.sha256))
+            log.exception("Erro extração %s (%s)", doc_id, args.engine)
+            rows.append(_row_error(doc_id, handle, f"{args.engine}_err:{e}", sha256=dl.sha256))
             continue
 
         rows.append({
@@ -105,6 +115,7 @@ def main() -> int:
             "n_pages": extract.n_pages,
             "full_text": extract.full_text,
             "tables_md": extract.tables_md,
+            "engine": extract.engine,
             "error": extract.error,
             "extracted_at": datetime.now(timezone.utc).isoformat(),
         })
@@ -127,6 +138,7 @@ def _row_error(doc_id: str, handle: str | None, err: str, sha256: str = "") -> d
         "n_pages": 0,
         "full_text": "",
         "tables_md": [],
+        "engine": "",
         "error": err,
         "extracted_at": datetime.now(timezone.utc).isoformat(),
     }

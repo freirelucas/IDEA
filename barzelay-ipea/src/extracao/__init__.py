@@ -1,9 +1,15 @@
 from src.extracao.download import DownloadResult, baixar_pdf
-from src.extracao.pdf import ExtractedText, ler_pdf_com_docling, split_pdf_em_blocos
+from src.extracao.pdf import (
+    ExtractedText,
+    extrair_com_pymupdf,
+    ler_pdf_com_docling,
+    split_pdf_em_blocos,
+)
 
 __all__ = [
     "baixar_pdf",
     "DownloadResult",
+    "extrair_com_pymupdf",
     "ler_pdf_com_docling",
     "split_pdf_em_blocos",
     "ExtractedText",

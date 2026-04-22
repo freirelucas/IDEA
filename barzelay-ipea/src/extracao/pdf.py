@@ -1,10 +1,14 @@
 """
-Extração de texto de PDFs via Docling.
+Extração de texto de PDFs.
 
-Portado de `ipeadata-lab/IpeaPub: ingestao/create_ingestion.py` funções
-`ler_pdf_com_docling` e `split_pdf_em_blocos`. Descartadas as partes de
-embedding (Qdrant/FastEmbed/ColBERT) e chunker semântico — Barzelay
-precisa só do texto completo para classificação.
+Duas engines:
+- `pymupdf`: rápida (<1s/PDF), usa apenas texto nativo/pré-OCR do PDF. Default.
+- `docling`: pesada (~30s-2min/PDF), faz OCR novo com EasyOCR + extrai
+  estrutura de tabelas. Precisa `easyocr` instalado.
+
+Portado de `ipeadata-lab/IpeaPub: ingestao/create_ingestion.py`. Descartadas
+as partes de embedding (Qdrant/FastEmbed/ColBERT) e chunker semântico —
+Barzelay precisa só do texto completo para classificação.
 """
 from __future__ import annotations
 
@@ -22,7 +26,24 @@ class ExtractedText:
     full_text: str
     n_pages: int
     tables_md: list[str]
+    engine: str
     error: str | None = None
+
+
+def extrair_com_pymupdf(pdf_path: Path) -> ExtractedText:
+    """Extrai texto de um PDF via PyMuPDF — rápido, usa OCR pré-existente."""
+    try:
+        with pymupdf.open(pdf_path) as doc:
+            n_pages = len(doc)
+            paginas = [p.get_text() for p in doc]
+    except Exception as e:
+        log.error("PyMuPDF falhou em %s: %s", pdf_path.name, e)
+        return ExtractedText("", 0, [], engine="pymupdf", error=f"pymupdf_err:{e}")
+
+    texto = "\n\n".join(paginas).strip()
+    if not texto:
+        return ExtractedText("", n_pages, [], engine="pymupdf", error="texto_vazio")
+    return ExtractedText(texto, n_pages, [], engine="pymupdf", error=None)
 
 
 def split_pdf_em_blocos(
@@ -116,7 +137,7 @@ def ler_pdf_com_docling(
     if not docs_parciais:
         if temp_dir and temp_dir.exists():
             _cleanup(temp_dir)
-        return ExtractedText(full_text="", n_pages=total_pages, tables_md=[], error="docling_empty")
+        return ExtractedText("", total_pages, [], engine="docling", error="docling_empty")
 
     textos: list[str] = []
     tabelas: list[str] = []
@@ -135,6 +156,7 @@ def ler_pdf_com_docling(
         full_text="\n\n".join(textos),
         n_pages=total_pages,
         tables_md=tabelas,
+        engine="docling",
         error=None,
     )
 
