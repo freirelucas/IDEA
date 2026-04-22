@@ -57,8 +57,14 @@ class DSpaceScraper:
         Extrai campos Dublin Core de um item DSpace (sem normalizar).
 
         Campos com cardinalidade >1 em Dublin Core (autores, resumo, palavras,
-        tipo) são sempre retornados como lista, mesmo com 0 ou 1 elemento,
-        para manter o schema estável ao serializar em Parquet.
+        tipo, contributor_other, orgunit_uuid) são sempre retornados como lista,
+        mesmo com 0 ou 1 elemento, para manter o schema estável ao serializar
+        em Parquet.
+
+        `contributor_other` (de `dc.contributor.other`) carrega os nomes textuais
+        das diretorias/unidades; `orgunit_uuid` (de `relation.isOrgUnitOfPublication`)
+        carrega o UUID da OrgUnit no DSpace — filtros por diretoria devem
+        combinar ambos, já que itens legados (pré-2020) só populam o primeiro.
         """
         metadata = item.get("metadata", {})
 
@@ -83,6 +89,8 @@ class DSpaceScraper:
             "resumo": get_list("dc.description.abstract"),
             "palavras_chave": get_list("dc.subject.keyword"),
             "tipo": get_list("dc.type"),
+            "contributor_other": get_list("dc.contributor.other"),
+            "orgunit_uuid": get_list("relation.isOrgUnitOfPublication"),
             "last_modified": item.get("lastModified"),
         }
 

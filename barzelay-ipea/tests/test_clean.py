@@ -127,3 +127,21 @@ class TestCleanItem:
         out = clean_item({"autores": "Único Autor", "tipo": "Livro"})
         assert out["autores"] == "Único Autor"
         assert out["tipo"] == "Livro"
+
+    def test_contributor_other_e_orgunit_uuid(self):
+        raw = {
+            "contributor_other": [
+                "Diretoria de Estudos e Políticas do Estado, das Instituições e da Democracia - DIEST",
+                "Instituto de Pesquisa Econômica Aplicada",
+            ],
+            "orgunit_uuid": ["38b33462-dc75-43f2-9bda-1f3c54757ae7"],
+        }
+        out = clean_item(raw)
+        assert "DIEST" in out["contributor_other"]
+        assert " | " in out["contributor_other"]
+        assert out["orgunit_uuid"] == "38b33462-dc75-43f2-9bda-1f3c54757ae7"
+
+    def test_contributor_other_e_orgunit_uuid_vazios(self):
+        out = clean_item({})
+        assert out["contributor_other"] == ""
+        assert out["orgunit_uuid"] == ""

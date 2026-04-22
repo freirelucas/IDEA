@@ -101,6 +101,11 @@ def clean_item(raw: dict[str, Any]) -> dict[str, Any]:
 
     cleaned["tipo"] = _join_field(raw.get("tipo"), sep="; ") or ""
 
+    cleaned["contributor_other"] = (
+        _join_field(raw.get("contributor_other"), sep=" | ") or ""
+    )
+    cleaned["orgunit_uuid"] = _join_field(raw.get("orgunit_uuid"), sep=",") or ""
+
     cleaned["ano"] = _parse_year(raw.get("ano"))
 
     iso_utc, epoch = _parse_last_modified(_normalize_string(raw.get("last_modified")))

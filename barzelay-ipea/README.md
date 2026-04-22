@@ -25,19 +25,36 @@ uv sync --extra dev
 # 2. Rodar testes
 uv run pytest
 
-# 3. Smoke test do scraper (2 páginas ≈ 24 documentos)
+# 3. Smoke test do scraper (2 páginas ≈ 40 documentos)
 uv run python -m src.scraping --limit 2
 
-# 4. Rodar o scraper completo (pode levar horas, depende da API)
+# 4. Rodar o scraper completo (~6 min, ~900 páginas, ~18k documentos)
 uv run python -m src.scraping
 
-# 5. Abrir notebook de cobertura
+# 5. Notebook de cobertura do corpus completo
 uv run jupyter lab notebooks/01_cobertura.ipynb
+
+# 6. Notebook de cobertura do subset DIEST (grava metadados_diest.parquet)
+uv run jupyter lab notebooks/02_cobertura_diest.ipynb
 ```
 
 Saídas:
 - `data/raw/metadados_raw_{timestamp}.parquet` — campos brutos da API DSpace.
 - `data/interim/metadados.parquet` — campos normalizados (`clean_item`).
+- `data/interim/metadados_diest.parquet` — subset DIEST (após rodar o notebook 02).
+
+## Filtro por diretoria
+
+A API DSpace marca a diretoria em dois caminhos, ambos expostos no endpoint
+`browses/dateissued/items`:
+
+- `dc.contributor.other` → coluna `contributor_other` (texto livre; usado em
+  todo o histórico).
+- `relation.isOrgUnitOfPublication` → coluna `orgunit_uuid` (linkagem
+  relacional; apenas em itens recentes, tipicamente pós-2020).
+
+`src.scraping.filter_by_diretoria(df, "DIEST")` combina os dois sinais.
+UUIDs conhecidos em `src.scraping.diretoria.ORGUNIT_UUID`.
 
 ## Layout
 
