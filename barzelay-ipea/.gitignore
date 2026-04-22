@@ -1,0 +1,21 @@
+.env
+.venv/
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.ipynb_checkpoints/
+uv.lock
+*.egg-info/
+dist/
+build/
+
+# Dados e cache — versionar só os .gitkeep
+data/raw/*
+!data/raw/.gitkeep
+data/interim/*
+!data/interim/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+cache/pdfs/*
+!cache/pdfs/.gitkeep
